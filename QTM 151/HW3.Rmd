@@ -1,0 +1,156 @@
+---
+title: "HW 3"
+author: "Eric Xue"
+date: "November 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+pacman::p_load(knitr, tidyverse, janitor)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+**Write this homework acting as if I don't know what I asked you. For example, don't simply list question numbers for the headings. If you gave this document to someone else who didn't know the assignment, they should be able to understand what you did by reading the headings, code, and accompanying text.**
+
+**Look to my HW1 and RMarkdown Organization examples for how to write good headings and organize your assignment.**
+
+This HW is worth 10 total points. It is adapted from Dr. Martin van der Linden at Emory.
+
+1. Change the author and date fields in the header above to your name and the date.
+
+2. Make sure to load any packages you may need right at the start. Do *NOT* include the `learnr` package, ever, unless you are writing an interactive Tutorial (which you won't do in this) - this will cause problems.
+
+3. Ensure that no chunks have the `include = FALSE` or `echo = FALSE` option, as I want to be able to see *all* your code and output.
+
+4. Brief but descriptive headings and document organization (answers under headings, text near relevant code, brief explanatory text as indicated below, etc.) (1 pt)
+
+5. We will be tidying a data set on migrations from the United Nations (UN), which you can find on Canvas. The data set contains the number of residents of different countries and regions of the world who have been classified as “migrants” in various years. (The actual data set you can download from the UN website is really messy - the version on Canvas is already somewhat trimmed down and cleaned.) 
+
+    First, import the data (using `read_csv()` from `readr` rather than `read.csv()`). Then drop the `Sort order`, `Notes`, `Country code`, and `Type of data (a)` columns from the data frame - we don't need them - and rename `Major area, region, country or area of destination` to `area_dest`. Note that if you're in a `dplyr` verb and want to refer to a column/variable name that has a space in it, you must surround the whole name in backticks ``. The resulting data frame should have dimensions 237 x 19. (1 pt)
+    
+6. Ugh, those remaining variable names have all those spaces and weird capitalization and it's just all TOO MUCH. Let's fix that, using the function (that you may not have quite learned yet) `janitor::clean_names()`. Look [here](https://cran.r-project.org/web/packages/janitor/vignettes/janitor.html#clean-data.frame-names-with-clean_names) or in Tutorial 10.1 for an introduction. Remember you might need to install this function's package first!
+
+    You can make all variable names `snake_case` (the good and righteous choice) or `camelCase` (the devil's coding). Print the first few rows of your result. (1 pt)
+    
+7. Scan through the data a bit. Does there appear to be any data *missing*? If so, what sort of data is it (just tell me generally, no need to list every single value or anything)? How does that "missing" data seem to be stored (that is, what "value" indicates some data is missing)? Answer in brief text. (0.5 pts)
+    
+8. The values for the number of migrants by sex are currently spread across a number of columns. Let's make the data frame more tidy by having the number of migrants in a single column; a row for each country, sex (Male, Female, or Both), and year; and 4 columns for the country/region, sex, year, and number of migrants. **HINT**: You'll need some combination of `pivot_longer()`, `pivot_wider()`, `separate()`, and/or `unite()` to accomplish this (or if you can figure out another way, that's fine, godspeed!).
+
+    You should end up with a data frame that is 4,266 x 4. (4 pts)
+
+9. Great, now I'd like you to sum up the total number of migrants across all countries in each year in our dataset. -Starts coding- This should be eas...oh, hell. There's a problem we still need to solve.
+
+    i) **Identify, describe in text, and solve it.** HINT: Do those values in n_migrants look quite right? (1 pt)
+
+        We'll learn more about this code later, but here's what you would use, along with a `dplyr` verb, to solve this remaining issue: `as.double(str_replace_all(n_migrants, " ", ""))`.
+    
+        I think you should be getting to the point where, even though you haven't seen it before, you should be able to puzzle out on your own what `str_replace_all()` does - at least if I tell you "str" is short for "string." Remember the help pages! But as an extra hint, check what `str_replace_all(string = "apples and bananas", pattern = " ", replacement = "")` does.
+    
+    ii) What happened to those missing values from question 7? How did they change/how are they stored now? (0.25)
+    
+(You don't actually need to give me the total migrants per year once you fix this issue, it was just a plot device to move us along.)
+
+10. Why did we do any of this? Where was the value? 
+
+    I'd like you to now create a (facetted) plot of the number of migrants by binary sex (1 line for males, 1 for females, with apologies to our non-binary friends) over time in Japan, China, and South Sudan. See the value now? (1 pt)
+    
+11. One last question: what's up with that South Sudan plot? Trace this back to an issue in our data frame and explain why it looks the way it does. (0.25 pts)
+
+    
+**To submit this assignment:**
+
+Ideally, knit straight to PDF by changing `html_document` to `pdf_document` in line 5 above. This should work as long as you properly installed LaTeX in Tutorial 0.1. Otherwise:
+
+1. Knit to HTML. An HTML document should open automatically in another RStudio window.
+
+2. Click "Open in Browser" in that HTML document. It should open as a webpage in your default browser (e.g. Chrome).
+
+3. Click Ctrl+P/Command+P, but instead of printing a hard copy on your printer click "Save as PDF."
+
+4. Save and upload that document to Canvas.
+    
+    
+
+
+------BEGIN ANSWER BELOW--------
+
+## Data Clening, UN Migrant Data
+
+#### Set-up and Explore the Dataset
+```{r}
+pacman::p_load(tidyverse, janitor)
+migrant <- read.csv("UN_Migrant_2015.csv")
+head(migrant)
+summary(migrant)
+```
+
+#### Drop Columns and Rename
+
+Drop the unnecessary columns and rename the unnecessary long column name
+```{r}
+migrant <- migrant %>% 
+    select(-c("锘縎ort.order","Notes","Country.code","Type.of.data..a."))
+
+names(migrant)[1] <- paste("area_dest")
+head(migrant)
+```
+
+#### Fix Unnecessary Capitalization
+
+Change the capitalization of all columns to camelCase.
+```{r}
+migrant <- migrant %>% 
+    clean_names(., "lower_camel")
+head(migrant)
+```
+
+#### Identify Missing Data
+
+There are missing data, which is indicated by two dots "..". The missing data is the number of migrants of a given year 
+
+#### Furthur tidy and solve remaining issue
+
+Change the data to from wide data to long data. This prepares the data to visualize later. Now the 4 columns are country, sex, year, and number of migrants
+```{r}
+migrant <- migrant %>% 
+    pivot_longer(cols = "both1990":"female2015",
+                 names_to = "year",
+                 values_to = "num_of_migrant") %>% 
+    separate(year,
+             into = c("sex","year"),
+             sep = "(?<=[A-Za-z])(?=[0-9])",
+             convert = TRUE)
+```
+
+```{r}
+typeof(migrant$num_of_migrant)
+```
+I have noticed that the column for the number of migrants is character type. We need to change it to numeric by the following code
+
+```{r}
+migrant$num_of_migrant <- as.double(str_replace_all(migrant$num_of_migrant, " ", ""))
+```
+The missing value from question 7 are now stored in the format of "NA"
+
+#### Plot: Number of migrants by bynary sex
+
+Faceted plot of number of migrants by binary sex in Japan, China, and South Sudan
+```{r}
+migrant %>% 
+    filter(areaDest == "China" | areaDest == "Japan" | areaDest == "South Sudan") %>% 
+    filter(sex == "female" | sex == "male") %>% 
+    ggplot(mapping = aes(x = year)) +
+    geom_point(aes(y = num_of_migrant, color = sex))+
+    geom_line(aes(y = num_of_migrant, color = sex)) +
+    facet_wrap(~ areaDest, scales = "fixed") +
+    labs(title = "Num of Binary Sex in three Countries",
+         x = "Year",
+         y = "Number of Migrants") +
+    theme(legend.position = "bottom",
+          legend.title = element_blank())
+```
+This plot shows that among three countries, the number of migrants grow over time. Japan has the most significant growth until 2010 with higher growth rate for female migrant than male. In China, the number of migrants grow steadily with higher growth rate for male than female. 
+
+South Sudan plot looks the way it does because our data frame has a lot of missing values for the number of migrants in Sudan from 1990 - 2015. The only years we have data are the year of 2010 and 2015. The growth rate of female and male are similar in South Sudan in this two years

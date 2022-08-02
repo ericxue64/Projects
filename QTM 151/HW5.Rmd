@@ -1,0 +1,128 @@
+---
+title: "HW 5"
+author: "Eric Xue"
+date: "December 2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+pacman::p_load(knitr, tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+**Write this homework acting as if I don't know what I asked you. For example, don't simply list question numbers for the headings. If you gave this document to someone else who didn't know the assignment, they should be able to understand what you did by reading the headings, code, and accompanying text.**
+
+**Look to my HW1 and RMarkdown Organization examples for how to write good headings and organize your assignment.**
+
+This HW is worth 10 total points. It leans heavily on activities from the [Adventures in R Course created by Dr. Kelly Bodwin of California Polytechnic State University](https://www.adventures-in-r.com/).
+
+1. Change the author and date fields in the header above to your name and the date.
+
+2. Make sure to load any packages you may need right at the start. Do *NOT* include the `learnr` package, ever, unless you are writing an interactive Tutorial (which you won't do in this) - this will cause problems.
+
+3. Ensure that no chunks have the `include = FALSE` or `echo = FALSE` option, as I want to be able to see *all* your code and output.
+
+4. Brief but descriptive headings and document organization (answers under headings, text near relevant code, brief explanatory text as indicated below, etc.) (1 pt)
+
+5. Recall this activity from QTM Hw5: Write a for-loop that will, when you run the code, take the tibble `flights` and export *3* CSV files of flights *from January*: one for each origin airport (EWR, JFK, and LGA).
+
+    We accomplished it with code like this:
+    
+    ```{r export_for_loop}
+pacman::p_load(nycflights13, tidyverse, fs)
+
+origin <- c("EWR", "JFK", "LGA")
+
+for(i in origin){
+    
+  origin <- flights %>%
+    #group_by(origin) %>% 
+      filter(origin == i & month == 1) #%>% 
+    #write_csv(paste0("./origin_", i, ".csv"))
+  
+  write_csv(origin, paste0("./origin_", i, ".csv"))
+}
+```
+    
+    I'd like you to re-import these files using a `purrr` function.
+    
+    A complete answer will include: code to read in the files and some sort of output to show me they all read in to a single new file; and a detailed explanation of what the `purrr` function you used does, including a description of what each argument in the code means. (3 pts)
+    
+6. Use a `purrr` function to count the number of `NA` values in each column in the `penguins` data frame from the `palmerpenguins` package. You may output the information in any format you want (e.g. list, data frame) as long as each column name and the number of `NA` values is listed. 
+
+    If you've mastered tilde dot notation (or maybe even if not), you can accomplish this in a single line. 
+    
+    HINT: Think about which task with the `gapminder` data this is similar to in Dr. Barter's tutorial. (3 pts)
+
+7. Use a `purrr` function to create a list of 3 plots, split by airport. The plot can be any plot you want that can sensibly be split by airport. 
+
+    Access and print the second element of that list. (3 pts)
+    
+**To submit this assignment:**
+
+Ideally, knit straight to PDF by changing `html_document` to `pdf_document` in line 5 above. This should work as long as you properly installed LaTeX in Tutorial 0.1. Otherwise:
+
+1. Knit to HTML. An HTML document should open automatically in another RStudio window.
+
+2. Click "Open in Browser" in that HTML document. It should open as a webpage in your default browser (e.g. Chrome).
+
+3. Click Ctrl+P/Command+P, but instead of printing a hard copy on your printer click "Save as PDF."
+
+4. Save and upload that document to Canvas.
+    
+    
+
+
+------BEGIN ANSWER BELOW--------
+
+# `purrr` Practice with NYC Flights and Penguin
+
+### Load Data and Packages
+```{r}
+pacman::p_load(nycflights13, tidyverse, palmerpenguins,fs)
+data("flights")
+data("penguins")
+```
+
+
+## NYC Flights
+
+### Combining 3 files of flights sperated by airports from January 
+```{r}
+files <- dir(pattern = ".csv")
+files
+
+Combine <- files %>% 
+  map(read_csv) %>% 
+  reduce(rbind)
+
+tibble(Combine)
+```
+First, I import all the files that ends with .csv from my working directory to "files". Then, I use map to read each each file in files individually, and combine them into one dataframe witn reduce(rbind). I call the combined dataset "Combined"
+
+### Arrival v.s. Departure Delay split by airport
+```{r}
+plots <- map(.x = c("EWR", "JFK", "LGA"),
+             .f = ~{
+               flights %>% 
+                 filter(origin == .x,) %>% 
+                 ggplot()+
+                 geom_point(aes(x = arr_delay, y = dep_delay))+
+                 ggtitle(glue::glue(.x," ", "Arrival vs. Departure  Delay"))
+             })
+plots[2]
+```
+To produce three plots with different airports, I first define my .x to be "EWR", "JFK", "LGA". Map function will filter the flight data set with each airport in .x and create the plot. Each time it will produce a dot plot of arrival delay vs. departure delay, and the three plots with different airport form a list called "plots". I access and print the second plot by simply using [2].
+
+
+## Penguin Dataset
+
+### Count number of NA in penguins dataset
+```{r}
+penguins %>% map_df(~(data.frame(n = sum(is.na(.x)))), .id = "variable")
+```
+I use map_df to create another data frame, which is made of the variable name of penguin dataset and a column "n". n is the number of "NA" that each column has, which map calculates for me automatically.

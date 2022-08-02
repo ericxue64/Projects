@@ -1,0 +1,263 @@
+---
+title: "HW 4"
+author: "Eric Xue"
+date: "November 2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+pacman::p_load(knitr, tidyverse)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+**Write this homework acting as if I don't know what I asked you. For example, don't simply list question numbers for the headings. If you gave this document to someone else who didn't know the assignment, they should be able to understand what you did by reading the headings, code, and accompanying text.**
+
+**Look to my HW1 and RMarkdown Organization examples for how to write good headings and organize your assignment.**
+
+This HW is worth 10 total points. It leans heavily on activities from the [Adventures in R Course created by Dr. Kelly Bodwin of California Polytechnic State University](https://www.adventures-in-r.com/).
+
+1. Change the author and date fields in the header above to your name and the date.
+
+2. Make sure to load any packages you may need right at the start. Do *NOT* include the `learnr` package, ever, unless you are writing an interactive Tutorial (which you won't do in this) - this will cause problems.
+
+3. Ensure that no chunks have the `include = FALSE` or `echo = FALSE` option, as I want to be able to see *all* your code and output.
+
+4. Brief but descriptive headings and document organization (answers under headings, text near relevant code, brief explanatory text as indicated below, etc.) (1 pt)
+
+5. For practice with `stringr` as well as more practice with data cleaning in a real world example, I'd like you to work through homework problems 1-4 from Dr. Martin van der Linden's HW5 assignment, which is posted on Canvas alongside this. The data `raw_ab.csv` is also posted alongside the assignment. (3 pts)
+
+    * Q2 is a bit tricky because it deals with parentheses, which (like `.`) are special characters in regex. SEE *R for Data Science* section 14.3.1 for a reminder on how to deal with such characters.
+
+
+6. For more practice with regular expressions, let's decode the secret message in [Puzzle 4.1](https://www.adventures-in-r.com/post/04-functions-regex/) from Adventures in R. (3 pts)
+
+    HINTS AND CLARIFICATIONS:
+    
+    * I *would* like you to do Warm-Up Exercises 1, 3, 4, and 5.
+    
+    * Warm-up 4: to identify and highlight any punctuation, you may use the regex character class `"[:punct:]"`
+    
+    * Warm-up 5: First identify (using code, not manually!) the max length of an element of the scrambled message. Then recall (or perhaps learn for the first time) you can use the notation `<VECTOR>[<LOGICAL CRITERION>]` to pull out only the elements of a vector that meet the stated criterion. For example, if you have a vector `x <- c(1:10)`, what does `x[x %% 2 == 0]` return? Try it!
+    
+    * Question 2: try `str_sub()`
+    
+    * Question 6: this one is trickier than it looks at first, but you can do it. For example, if you had the word "dumb!" this wants you to change it to "dumy!" But if you have "dumb." it wants you to change it to "dumy." Hard-coding options for each possible punctuation mark is not something I want you to do. Instead, review the section on grouping and backreferences in *R for Data Science* Ch. 14.3.5. Can you figure out how you could use this in your `replacement = ` argument to specify that you want it to replace the b with the y but keep any of the subsequent punctuation? You'll need to tell it to *refer back* to the punctuation in your `pattern =` argument.
+    
+    * Question 7: Don't worry about replacing with the correct case (that is, you need to identify instances of both "k" and "K", but just replace them all with either "v" or "V" - don't worry about matching them up to the case of the original k).
+    
+    * Don't forget to print the decoded message in an easily human-readable way using `str_c()` and tell me what movie it's from!
+    
+    
+7. For practice with `lubridate`, find the identity of the Zodiac Killer (sadly, not Ted Cruz's father) by solving [Puzzle 3](https://www.adventures-in-r.com/post/03-tidy-factors/) from Adventures in R. (3 pts)
+
+    HINTS AND CLARIFICATIONS:
+    
+    * There are many ways to accomplish this puzzle. Some - but not all - may require explicitly formatting `Time.Spotted` as a datetime and/or a date.
+    
+    * You should *not* need to complete Question 4 (the Iceland criterion) to complete this puzzle, and it requires fighting with time zones, so please skip it.
+
+
+8. OPTIONAL OPTIONAL OPTIONAL. FOR ADDITIONAL PRACTICE AND FUN ONLY. YOU DO NOT HAVE TO TURN THIS IN IF YOU DON'T WANT, AS THESE QUESTIONS ARE FAIRLY TRICKY.
+
+    For practice with `stringr`, let's figure out some patterns in Billboard Hot 100 songs. Answer questions 6 and 7 from [Lab 3](https://www.adventures-in-r.com/post/03-tidy-factors/) from Adventures in R. Ignore anything in the Instructions that counters how I tell you to structure a document.
+
+    HINTS AND CLARIFICATIONS:
+    
+    * Question 6: the basic path you should take to solve it is this. Pull out the column `title` into a character vector either using `pull()` or the `$` operator. You can then *extract all* the individual words from each song's title by using regular expressions and a `stringr` function that looks for a pattern of any number of consecutive letters (capital or lower-case) in a row. EXTRA HINT: `"[a-c]"` would look for any single instance of the lower case letters a, b, or c. You need to allow for any positive number of instances of any letter a to z, lower case or capital.
+    
+        If you've done this correctly, this should produce a list where each element is a character vector with a length of the number of words in that song's title. You can then use the `unlist()` function to turn this list into a character vector itself, with length equal to the total length of all its constituent vectors.
+    
+        You should then take *this* vector, and turn it into a `tibble()` with one column (the words themselves - we could call that column `word`). Finally, you should figure out a way to identify if a word is 4 letters or longer, then figure out a way to count up the number of times each word occurs in `word`. You can print the first however many highest values you'd like.
+        
+        If you've done this correctly, the second-highest word should be "your" with 955 instances.
+    
+    * Question 7: here you should probably begin by splitting the `artist` column into a main and featured section. Then you need to figure out a way to *split* the resulting string of featured artist(s) for each song into individual artists - note these can be split by `,`, `&`, `or`, or `and`. This should, if done correctly, result in a column of featured artist(s) that sometimes has one artist, and sometimes has a character vector of multiple artists. 
+    
+        You could then drop any songs with no featued artist(s) since we don't need to worry about them any more. Pull out the featured artist(s) column and, once again, use `unlist()` again to turn the result into a vector where each element is a single artist's name. Use `str_trim()` to remove any annoying whitespace at the start or end of each element, put the rest back into tibble form, then count the number of times each artist occurs. Print the first however many highest values you'd like.
+        
+        If you've done this correctly, the second-most common featued artist should be "DRAKE" with 40 credits.
+    
+**To submit this assignment:**
+
+Ideally, knit straight to PDF by changing `html_document` to `pdf_document` in line 5 above. This should work as long as you properly installed LaTeX in Tutorial 0.1. Otherwise:
+
+1. Knit to HTML. An HTML document should open automatically in another RStudio window.
+
+2. Click "Open in Browser" in that HTML document. It should open as a webpage in your default browser (e.g. Chrome).
+
+3. Click Ctrl+P/Command+P, but instead of printing a hard copy on your printer click "Save as PDF."
+
+4. Save and upload that document to Canvas.
+    
+    
+
+
+------BEGIN ANSWER BELOW--------
+
+# String Assignment
+
+## Packages and Data Preparation, Basic Exploration 
+```{r}
+pacman::p_load(lubridate,stringr)
+raw_ab <- read.csv("raw_ab.csv")
+summary(raw_ab)
+head(raw_ab)
+message <- read.csv("https://www.dropbox.com/s/lgpn3vmksk3ssdo/scrambled_message.txt?dl=1", stringsAsFactors = FALSE)$Word
+message
+time <- read.csv("suspect_times.csv")
+summary(time)
+head(time)
+```
+
+## Data Cleaning
+```{r}
+ab1 <- raw_ab %>% 
+    filter(str_detect(CDC,"\\d")|CDC != NA)
+
+ab2 <- ab1 %>%
+    mutate(CDC = str_replace_all(CDC, "\\(|\\)","")) %>% 
+    mutate(AGI = str_replace_all(AGI, "\\(|\\)",""))
+
+ab3 <- ab2 %>% 
+    mutate(CDC = str_replace_all(CDC, ",", "")) %>%
+    mutate(AGI = str_replace_all(AGI, ",",""))
+
+ab4 <- ab3
+ab4$CDC <- as.double(ab4$CDC)
+ab4$AGI <- as.double(ab4$AGI)
+ab4 <- ab4 %>% 
+    select(-X)
+head(ab4)
+```
+
+## Decode Scrambled message 
+
+### **Warm-up**
+
+How many characters in the message?
+
+```{r}
+sum(nchar(message))
+```
+
+How many words are in the scrambled message?
+```{r}
+summary(message)
+```
+127 words
+
+
+Show all the punctuation marks in the scrambled message
+
+```{r}
+str_extract_all(message, "[:punct:]")
+```
+
+Print out, in all capitals, the longest word in the scrambled message
+
+```{r}
+longest <- message[str_count(message,"[A-z]")==max(str_count(message, "[A-z]"))]
+str_to_upper(longest)
+```
+
+### **Decode**
+
+Remove all spaces before or after each word
+
+```{r}
+message1 <- message %>% 
+    str_replace_all(" ", "")
+```
+
+Drop all characters that is long than the 16th
+
+```{r}
+message2 <- message1 %>% 
+    str_sub(1,16)
+```
+
+Delete ugh with number of h, followed by punctuation
+
+```{r}
+message3 <- message2 %>% 
+    str_replace_all("ugh[h]*[:punct:]","")
+```
+
+Replace all instances of exactly 2 a's with 2 e's
+
+```{r}
+message4 <- message3 %>% 
+    str_replace_all("aa","ee")
+```
+
+Replace all z's with t's
+
+```{r}
+message5 <- message4 %>% 
+    str_replace_all("z","t")
+```
+
+Change every word that ends in b to y
+
+```{r}
+message6 <- message5 %>%
+    str_replace("b$","y") %>% 
+    str_replace("b([:punct:])$", "y\\1")
+```
+
+Change every word that starts with k to v
+
+```{r}
+message7 <- message6 %>% 
+    str_replace("^k|K","v")
+```
+
+Print message and determine the source of movie
+
+```{r}
+str_c(message7, collapse = " ")
+```
+The movie is V for Vendetta
+
+## Crack the case of "Zodiac Killer"
+
+Rule out morning
+```{r}
+time <- time %>% 
+    filter(hour(Time.Spotted) >= 12)
+```
+
+Rule out Tuesdays and Thursdays
+```{r}
+time <- time %>% 
+    filter(wday(Time.Spotted) != 3|5)
+```
+
+Thanksgiving clue
+```{r}
+Thanksgiving2018 <- ymd_hms("2018-11-22 00:00:00")
+time <- time %>% 
+    filter(Time.Spotted>=Thanksgiving2018 - days(35) & Time.Spotted <= Thanksgiving2018 + days(35))
+```
+
+Birthday card clue
+```{r}
+time <- time %>% 
+    filter(mday(Time.Spotted) >= 22 & mday(Time.Spotted)<24)
+```
+
+Killer's Clue
+```{r}
+clue <- ymd_hms("1970-01-01 00:00:00")
+time <- time %>% 
+    filter((ymd_hms(Time.Spotted) %--% clue) %/% minutes(1) %% 10 == 0)
+```
+
+He is the killer!
+```{r}
+time[1,1]
+```
