@@ -1,0 +1,130 @@
+---
+title: "HW 1"
+author: "Eric Xue"
+date: "2/17/2021"
+output: pdf_document
+---
+
+```{r setup}
+pacman::p_load(knitr, tidyverse, nycflights13)
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Instructions
+
+**Write this homework acting as if I don't know what I asked you. For example, don't simply list question numbers for the headings. If you gave this document to someone else who didn't know the assignment, they should be able to understand what you did by reading the headings, code, and accompanying text.**
+
+**Look to my HW1 and RMarkdown Organization examples for how to write good headings, organize your assignment, and how much narrative text (outside of code chunks) I want. But a good rule of thumb is: explain what YOU'RE doing, NOT what YOUR CODE is doing. I do NOT need to see a repeat, line-by-line narration of what your code does - you can use code comments for that. (In complex blocks you usually want at least a comment every few lines.) I DO want to see an overall summary of what you did in your analysis.**
+
+This HW is worth 10 total points.
+
+Below are a list of tasks I want you to accomplish and place into this document. Otherwise you have free reign to play around with RMarkdown elements and practice organizing your analysis.
+
+2. Make sure to load any packages you may need right at the start. Do *NOT* include the `learnr` package, ever, unless you are writing an interactive Tutorial (which you won't do in this) - this will cause problems. (1 pt)
+
+3. Ensure that no chunks have the `include = FALSE` or `echo = FALSE` option, as I want to be able to see *all* your code and output.
+
+4. Include at least:
+
+    i) Two different levels of headings. An easy way to do this is have one overall heading, and a sub-heading for each of Q5 parts i-ii below. Make your headings descriptive rather than just "Question 5.i". Remember, someone reading your analysis may have no idea what question 5.i is! (2 pts)
+    ii) Three different kinds of text formatting (e.g. bolding, italicizing, bulleted lists, relevant hyperlink, text-as-code, block quote). Check the RMarkdown cheatsheet for other options, but these are likely the simplest. (1.5 pts)
+    
+5. Install and load the `nycflights13` package. This contains a dataset, `flights`.
+
+    Open `flights` and explore it using at least two of the techniques we discussed in Tutorial 1.1: `head()` or `tail()`, `str()`, `summary()`, `skim()`, and `dfSummary()`. 
+    
+    Around your code chunk(s) and output, include a total of a few sentences of text that:
+    
+    i) Explain *briefly* what you're doing.
+    ii) Explain what you found, including - what data `flights` contains (try `?flights`!), what each observation/row represents and how many there are, and some key variables you found interesting (you don't need to include all of them!).
+    
+    I also want to introduce you here to one additional function from the `knitr` package: `kable()`. `kable()` can really help pretty up your tables in RMarkdown. Compare the default output for, say, `summary()` or `head()` with and without using `kable()`:
+    
+```{r}
+head(mpg)
+
+kable(head(mpg))
+```
+
+Doesn't the second look much prettier?  Use `kable()` on at least one of the exploratory tables you produce. For more details on all the things you can do with `kable()` (and an extension package, `kableExtra`), see [this post](https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html). (3.5 total pts)
+    
+
+6. Find the mean departure and arrival delay times (for rows where that data isn't missing) using a code chunk. Do planes appear to pick up any time in the air (that is, are their arrival delays any smaller than their departure delays)? About how much? Answer in narrative text near that chunk. (1.5 pts)
+    
+    
+    
+**To submit this assignment:**
+
+Ideally, knit straight to PDF by changing `html_document` to `pdf_document` in line 5 above. This should work as long as you properly installed LaTeX in Tutorial 0.1. Otherwise:
+
+1. Knit to HTML. An HTML document should open automatically in another RStudio window.
+
+2. Click "Open in Browser" in that HTML document. It should open as a webpage in your default browser (e.g. Chrome).
+
+3. Click Ctrl+P/Command+P, but instead of printing a hard copy on your printer click "Save as PDF."
+
+4. Save and upload that document to Canvas.
+    
+    
+
+
+------BEGIN ANSWER BELOW--------
+
+# Analysis of NYC flights in 2013
+
+## *The Data*
+
+**First we need to load the flights data**, which comes as part of the nycflights13 package
+
+```{r data}
+data("flights")
+```
+
+Next we want to explore the data a bit
+
+
+```{r}
+# Print the first 6 observations
+kable(head(flights, n=6))
+```
+
+```{r}
+# Print the last six observations
+tail(flights, n=6)
+```
+
+```{r}
+# Look at a summary of the data
+summary(flights)
+```
+
+The dataset contains data on the 
+
+1. departure (year, month, day)
+2. actual departure and arrival times
+3. scheduled departure and arrival times
+4. departure and arrival delays
+5. two letter carrier abbreviation 
+6. flight number
+7. plane tail number 
+8. origin and destination of the plane
+9. amount of time spent in the air 
+10. distance between airports 
+11. time of scheduled departure broken into hour and minutes
+12. scheduled date and hour of the fight as a POSIXct date.
+
+of flights departed from NYC in 2013. It has a mix of numerical variables (such as dep_deplay and arr_delay), integer variables (such as year and day), character variabbles (such as tailnum and dest), and POSIXct variables time_hour. 
+
+## *Delay picked up by the plane in the air*
+
+```{r Time delay}
+# Get average departure and arrival delay time
+mean(flights$dep_delay, na.rm = TRUE)
+mean(flights$arr_delay, na.rm = TRUE)
+```
+
+```{r}
+# Subtract the two numbers
+mean(flights$dep_delay, na.rm = TRUE)-mean(flights$arr_delay, na.rm = TRUE)
+```
+
+The plane does pick up some time in the air. The departure delay is longer than the arrival delay for about 6 minutes. These six minutes are the times that the plane picked up in the air. 

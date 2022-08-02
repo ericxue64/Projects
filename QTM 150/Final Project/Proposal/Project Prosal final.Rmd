@@ -1,0 +1,61 @@
+---
+title: "Project_Proposal"
+author: "Eric Xue, Tom Qiu, Tom Zhang"
+date: "2021/4/4"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# *Project Proposal*
+
+### The Data
+
+We will be using hotdog eating contest dataset
+
+Firstly, load the tidyverse package and hotdogs dataset that is going to be used
+
+```{r}
+hotdogs <- read.csv("hotdogs.csv")
+library(tidyverse)
+```
+
+Then we would want to do some basic exploration of the dataset
+
+```{r}
+#Shows structure of hotdogs dataset
+str(hotdogs)
+
+#Shows the first 6 data of the hotdogs dataset
+head(hotdogs)
+
+#Look at summary of the data
+summary(hotdogs)
+```
+
+The dataseta contains data of 380 contestant in terms of:
+
+1. Year
+2. Contest
+3. Competitor ID
+4. Last Name,
+5. First Name
+6. Record ID
+7. Dataset Rank
+8. ...
+
+Among the 16 variables in the hotdogs dataset, there are num variables, such as rate, and ACR, int variables, such as year and dataset rank, and chr variables, such as last name and first name. 
+
+### Research Questions 
+
+What is the difference in terms of the number of hotdogs eaten by the winner of man competition and women competition and the average difference between these two sex groups. In addition, what is the performance trajectory of the Eric Booker, Sonya Thomas
+and Joey Chestnut in the dataset with number of hotdogs eaten and its percentile in this competition.
+
+Variables we will use to answer these questions include Year, Contest, Number of Hot Dogs, and Contest Place. Some preliminary plan for answering this question: We need mean(), arrange(desc). We need to filter or mutate a new variable to check what type of contest is it. We also need to group_by contest place and summarize sum of the hotdogs eaten to answer the last question.
+
+
+

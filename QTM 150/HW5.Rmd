@@ -1,0 +1,123 @@
+---
+title: "HW5"
+author: "Eric Xue"
+date: "4/29/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+This HW is worth 10 total points.
+
+1. Make sure to load any packages you may need right at the start. Do *NOT* include the `learnr` package, ever, unless you are writing an interactive Tutorial (which you won't do in this course) - this will cause problems.
+
+2. Ensure that no chunks have the `include = FALSE` or `echo = FALSE` option, as I want to be able to see *all* your code and output.
+
+3. Brief but descriptive headings and document organization (answers under headings, text near relevant code, brief explanatory text as necessary, etc.) (1 pt)
+
+    **Look to my HW1 and RMarkdown Organization examples for how to write good headings, organize your assignment, and how much narrative text (outside of code chunks) I want. But a good rule of thumb is: explain what YOU'RE doing, NOT what YOUR CODE is doing. I do NOT need to see a repeat, line-by-line narration of what your code does - you can use code comments for that. (In complex blocks you usually want at least a comment every few lines.) I DO want to see an overall summary of what you did in your analysis.**
+    
+4. Write a for-loop that will, when you run the code, take the tibble `flights` and export *3* CSV files of flights *from January*: one for each origin airport (EWR, JFK, and LGA).
+
+    Note this is actually much simpler than the for-loops you saw in the Tutorial. For example, you do *not* need to create a separate output vector - just make sure each time through the for-loop it exports a file to a folder on your computer.
+    
+    Also note that you need not iterate through just *numeric* vectors. You can have i (or whatever your indexing variable is) "walk" through a character vector (HINT: such as a vector of origin airport names), as well! Each time through the loop, the object `i` will take on the value of its current position in that character vector.
+    
+    Here's one last hint. `paste0("./", i, ".csv")` will create a path to allow you to save a file named `i`.csv to your working directory.
+    
+    To prove you accomplished this, provide both: a.) your for-loop code and b.) a screenshot or picture of the folder to which it saved all the files after it runs; this screenshot must include the **size** and **creation/last modified time** of each of the 3 files. To help you place the screenshot into your RMarkdown/PDF file, I've provided a codeblock below to accomplish that. (4 pts)
+  
+
+5. Let's combine your newfound expertise with creating functions and if-else statements.
+
+    Create a "fizzbuzz" function. This is a classic computer science problem. It takes a single number as input. If the number is divisible by three, it returns “fizz”. If it’s divisible by five it returns “buzz”. If it’s divisible by three and five, it returns “fizzbuzz”. Otherwise, it returns the number.
+
+    But make it yours. Instead of "fizz" and "buzz", choose two other silly words, nonsense words, or sounds. 
+    
+    And make sure to prove to me it works by running it on an input that produces your "fizz", an input that produces your "buzz", and an input that produces your "fizzbuzz." (5 pts)
+    
+
+
+**To submit this assignment:**
+
+Ideally, knit straight to PDF by changing `html_document` to `pdf_document` in line 5 above. Otherwise:
+
+1. Knit to HTML. An HTML document should open automatically in another RStudio window.
+
+2. Click "Open in Browser" in that HTML document. It should open as a webpage in your default browser (e.g. Chrome).
+
+3. Click Ctrl+P/Command+P, but instead of printing a hard copy on your printer click "Save as PDF."
+
+4. Save and upload that document to Canvas.
+
+
+
+
+------BEGIN ANSWER BELOW--------
+
+# For-loops and If-else Practice
+
+### Data and Package
+
+First we have to load the dataset flights, which comes from nycflights13 package. We also load tidyverse as it contains function we need later. 
+
+```{r}
+pacman::p_load(nycflights13, tidyverse)
+data("flights")
+```
+
+### Exporting Data
+
+I export 3 files which contain only the flights information in January. Each file contains the flight observation for each origin airport (EWR, JFK, and LGA).
+
+```{r}
+
+January <- flights %>% 
+  filter(month==1)
+## Keep only the flights that took off in January.
+for (i in c("EWR","JFK","LGA")) {
+  airports <- filter(January, origin == i)
+  write.csv(airports, paste0("./", i, ".csv"))
+}
+## Having i walks through three character variables. Then, I only keep the observation with the given airport name by filtering and export it into a csv file.
+```
+
+This is the proof I have actually done it.
+
+```{r img1, echo = FALSE, out.width = "75%", fig.cap = "*Saved airport files*"}
+
+    knitr::include_graphics("E:\\桌面\\2021-04-29_020322.jpg")
+```
+
+
+### Game Function
+
+```{r}
+game <- function(input) {
+  if (input%%3==0 & input%%5==0){
+    return("35")
+  }else if (input%%5==0){
+    return("5")
+  }else if (input%%3==0){
+    return("3")
+  }else{
+    return(input)
+  }
+}
+```
+
+##### Test Function
+
+```{r}
+game(15)
+game(5)
+game(3)
+
+```
+

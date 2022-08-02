@@ -1,0 +1,165 @@
+---
+title: "HW3"
+author: "Eric Xue"
+date: "4/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Instructions
+
+Before we get started, I wanted to let you know something about the data for this homework: it's from the Transatlantic slave trade. This is a very sensitive subject, but I think it's valuable for us to confront the vast extent of and role slavery played in the history of the U.S. and other parts of the world. Please take a moment to read [an introduction to this data here.](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-06-16/readme.md) It does a good job of capturing my intent with this assignment. 
+
+However, my intent is irrelevant if you feel completing this assignment would be harmful to you. *If you are uncomfortable working with this data, please do not hesitate to reach out to me for a different dataset. You will not be judged or penalized in any way.*
+
+This HW is worth 10 total points.
+
+1. Make sure to load any packages you may need right at the start. Do *NOT* include the `learnr` package, ever, unless you are writing an interactive Tutorial (which you won't do in this course) - this will cause problems.
+
+2. Ensure that no chunks have the `include = FALSE` or `echo = FALSE` option, as I want to be able to see *all* your code and output.
+
+3. Brief but descriptive headings and document organization (answers under headings, text near relevant code, brief explanatory text as necessary, etc.) (1 pt)
+
+    **Look to my HW1 and RMarkdown Organization examples for how to write good headings, organize your assignment, and how much narrative text (outside of code chunks) I want. But a good rule of thumb is: explain what YOU'RE doing, NOT what YOUR CODE is doing. I do NOT need to see a repeat, line-by-line narration of what your code does - you can use code comments for that. (In complex blocks you usually want at least a comment every few lines.) I DO want to see an overall summary of what you did in your analysis.**
+
+4. Figure out how to import the `slave_routes` data frame two ways: 
+
+    i) Using a single line of code in the linked introduction above to get the data directly from Github (0.25 pts), 
+    ii) By downloading the file, saving it to your local computer, and importing it "manually" (as laid out in Tutorial 2.1). *You must use working directory notation (i.e. a "./" rather than a full file path).* (0.75 pts)
+
+5. Using a single continuous block of code with pipes (no intermediate stopping points) for each of the below sub-parts (3 blocks in total), give me output that shows:
+
+    i) Which port received the largest total number of enslaved people (from ships with a known number of enslaved people), and what was that number? You may show more than one port, as long as the top port is visible. (2 pts)
+    ii) Which `ship_name` made the most journeys before the year 1800 (you may show more than one ship, as long as the top ship is visible), and during what years (prior to 1800) did it operate? Exclude the `NA` values of `ship_name` as part of your first `dplyr` verb. 
+    
+        Note all the data you need to answer these questions should be visible in one piece of output. HINT: you may want the `min()` and `max()` functions. (2 pts)
+      
+    iii) Which *two* `ship_name`s made the most journeys without a named captain, in any years? Exclude the `NA` values of `ship_name` as part of your first `dplyr` verb. 
+      
+          HINT: you will want to create a new variable that indicates whether the ship had a missing captain or not. 
+      
+          You may show more than two ships, as long as the top two ships are visible. (2 pts)
+    
+    Provide about 1 sentence of narrative text that interprets the output and answers each question, i-iii.
+    
+6. Using a single continuous block of code with pipes for all data manipulation and visualization, produce a line graph of the number of total slaves that arrived in all ports by *decade* (again, only for ships with a known number of slaves; include all years in this analysis). Each decade must run from 0-9 (e.g. 1770-1779, not 1765-1774). Give the axes human-readable labels. 
+
+    HINT: You'll have to create a new decade variable. If you need help, think back to how we extracted the hour and minute values from the military time in the `flights` data.
+
+    
+    Answer the following questions:  
+
+    i) In what decade did the Transatlantic slave trade peak?
+    ii) You can calculate this manually in a separate block, but in this decade approximately how many enslaved people were being transported across the Atlantic *per day*? (3 pts)
+    
+    
+
+
+**To submit this assignment:**
+
+Ideally, knit straight to PDF by changing `html_document` to `pdf_document` in line 5 above. Otherwise:
+
+1. Knit to HTML. An HTML document should open automatically in another RStudio window.
+
+2. Click "Open in Browser" in that HTML document. It should open as a webpage in your default browser (e.g. Chrome).
+
+3. Click Ctrl+P/Command+P, but instead of printing a hard copy on your printer click "Save as PDF."
+
+4. Save and upload that document to Canvas.
+
+
+
+
+------BEGIN ANSWER BELOW--------
+
+# *Slave Routes Analysis*
+
+### The Data
+
+First we need to load data and the tidyverse package as it contains the function we need for later analysis. Slave_routes data is imported in two ways: directly from Githab. We can also import it mannuly.
+
+```{r}
+pacman::p_load(tidyverse)
+# slave_routes <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-06-16/slave_routes.csv')
+slave_routes <- read_csv("./slave_routes.csv")
+```
+
+
+### Data Analysis
+
+
+##### **Port and Number of Slaves**
+
+```{r}
+total_slave <- slave_routes %>% 
+  group_by(port_arrival) %>%
+  summarise(total = sum(n_slaves_arrived, na.rm = TRUE)) %>% 
+  arrange(desc(total))
+## I put observations that have same port-origin into groups. Then I create a summary table which has two variables, port_original and total. Port is all the groups I just created. Total is the sum of number of slaves arrived at a port. Then I make the it descending order based the total number of slaves arrived at each port.
+total_slave
+```
+Port Rio de Janeiro is on the top, which received the largest total number of slaves 683310
+
+
+##### **Ships, Journeys, and Years**
+
+```{r}
+Journeys <- slave_routes %>% 
+  filter(!is.na(ship_name)) %>% 
+  filter(year_arrival<1800) %>% 
+  group_by(ship_name) %>% 
+  summarise(Journey_count = n(),
+            Operation_start=min(year_arrival), 
+            Operation_end=max(year_arrival)) %>% 
+  arrange(desc(Journey_count))
+## Firstly, I only keep the observation that has a ship name and year_arrival variable is less than 1800. Then I puts all the observations into groups based on same ship name. Finally, I create a summary data with three variables, ship_name, journey_count, and Operation_start. Ship_name is all the groups I created. Journey_count is the number of observation in each group. Operation_start provides the earliest year_arrival in each ship group. I make things descending order based on the Journey count of each ship.
+Journeys
+```
+Ship Mary is on the top so it made the most journeys(211) before the year 1800. It starts 1645 and the latest journey it went on before 1800 is in 1799. 
+
+
+##### **Unnamed Captain? Most Journey?**
+
+```{r}
+Captain <- slave_routes %>% 
+  filter(!is.na(ship_name) & is.na(captains_name)) %>% 
+  group_by(ship_name) %>% 
+  summarise(Journey_count = n()) %>% 
+  arrange(desc(Journey_count))
+## First I only keep the observations that have a ship name and do not have a captain name. Then I put observations that share the same ship name into groups. Finally, I create a summary table for the leftover observation that has different ship name and the number of journey it went. I make it descending order based on the journey count of each ship.
+Captain
+```
+Esperan and NS do Rosario S Antônio e Almas made the most journeys without a named captain. Both of ships made 18 journeys
+
+
+
+##### **Visualization of Slave Trade by Decade**
+
+```{r}
+slave_routes %>% 
+  filter(!is.na(n_slaves_arrived)) %>% 
+  mutate(decade = (year_arrival%/%10)*10) %>% 
+  group_by(decade) %>% 
+  summarise(total = sum(n_slaves_arrived)) %>% 
+  ggplot(mapping = aes(x = decade, y = total)) + geom_line()+
+  labs(title = "Slave Trade by Decade", x = "Decades", y = "Total Number of Slaves Arrived")
+## Firstly, I only keep the observation that has record on number of slaves arrived. Then I mutate to create a new variable decade, which I get by chop off the last digit of the year_arrival. Finally, I create a line graph with x being decade, y being the number of slaves arrived.
+```
+Slave trade peaks in the decade of 1790-1799. 
+
+```{r}
+slave_routes %>% 
+  filter(!is.na(n_slaves_arrived)) %>% 
+  mutate(decade = (year_arrival%/%10)*10) %>% 
+  group_by(decade) %>% 
+  summarize(total = sum(n_slaves_arrived)) %>%
+  arrange(desc(total))
+
+```
+```{r}
+510082 / 3650
+```
+About 140 slaves were being transported across the Atlantic per day.

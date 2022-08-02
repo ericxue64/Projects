@@ -1,0 +1,189 @@
+---
+title: "HW4"
+author: "Eric Xue"
+date: "4/16/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(fivethirtyeight, tidyverse)
+```
+
+# Instructions
+
+This HW is worth 10 total points.
+
+1. Make sure to load any packages you may need right at the start. Do *NOT* include the `learnr` package, ever, unless you are writing an interactive Tutorial (which you won't do in this course) - this will cause problems.
+
+2. Ensure that no chunks have the `include = FALSE` or `echo = FALSE` option, as I want to be able to see *all* your code and output.
+
+3. Brief but descriptive headings and document organization (answers under headings, text near relevant code, brief explanatory text as necessary, etc.) (1 pt)
+
+    **Look to my HW1 and RMarkdown Organization examples for how to write good headings, organize your assignment, and how much narrative text (outside of code chunks) I want. But a good rule of thumb is: explain what YOU'RE doing, NOT what YOUR CODE is doing. I do NOT need to see a repeat, line-by-line narration of what your code does - you can use code comments for that. (In complex blocks you usually want at least a comment every few lines.) I DO want to see an overall summary of what you did in your analysis.**
+
+4. Load the `fivethirtyeight` R package and the data frames `classic_rock_raw_data` and `classic_rock_song_list`. Explore the datasets a bit and figure out what they contain. 
+
+    First, note that there's an error in the `classic_rock_song_list` file - an Elton John song is listed as being released in 1071, when it was actually 1971. Fix that using `mutate()` and `case_when()` (or another method of your choosing that fixes that ONE entry). Then:
+
+    Add a new column to `classic_rock_raw_data` with the year each song was released using a join. Print the first few observations to prove to me you've done it.
+    
+    There are two important HINTs here. The first is, when specifying the dataset you want to join (the "right" dataset, vs. the left one), use `select()` to choose only the column(s) you want to match on plus the column(s) you actually want to add to the left dataset. If there are any repeated columns not in your `by =` argument, they will be replaced with two versions of that column - `<VARIABLE NAME>.x` (the version from the left data frame), and `<VARIABLE NAME>.y` (the version from the right data frame). Just `<VARIABLE NAME>` will no longer exist. You almost always want to avoid this.
+    
+    Second, make sure you end up with as many observations in the new joined data frame as in the initial `classic_rock_raw_data`. You may need to execute the join on *two or more columns* to do this. Some songs with the same title have more than one artist, so if you join on `song` only you might add observations by creating two different records for each song play with different release years. There is a single column you can use to make this join work, but you may also use multiple columns that identify a unique observation. (3 pts)
+    
+5. Roughly speaking, in the U.S. radio stations with a callsign beginning with "K" are located west of the Mississippi River, while those beginning with "W" are located to its east. I want you to visualize the distribution of the release years of the songs played by all these radio stations, split into two categories: west and east (either with color/fill, facetting, or both). Use a histogram, frequency polygon, density plot, or ridge/joyplot.
+    
+    The easiest way to do this involves the `substr()` (or sub-string) function. To extract the first letter of a variable, you would use `substr(<VARIABLE NAME>, 1, 1)` - if you check the documentation using `?substr`, hopefully you can figure out why this is. This should allow you to then create a new variable for west vs. east of the Mississippi, and then you can apply your existing data visualization skills. 
+        
+    Make sure the graph has a title, human-readable axis labels, human-readable legend labels, and NO legend title.
+        
+    Describe what you see in about 1-2 sentences. Note what you're seeing is a distribution of the release years of the song plays from radio stations, not the years in which these stations released songs (radio stations don't release songs). If you are still confused about this, do a bit more research on the help page for the data frames and/or read the article linked there that they provide the data for. (3 pts)
+    
+6. Make the variable `artist` into a factor, then print the first 10 levels. 
+
+    Now choose your favorite artist, make them the new first level of the factor, then re-print the first 10 levels. (1 pt)
+    
+7. Extract the value "Jimi Hendrix" from the data as a length-1 character vector. Do this two ways:
+
+    i) Two steps: By first extracting/subsetting a single column vector, then indexing/subsetting that vector. (0.5 pts)
+    
+    ii) One step: by taking it directly from the data frame. (0.5 pts)
+    
+8. Consider the following list:
+
+    `list(list("I", "Love", "Rock & Roll", "Put", "Another"), 10, "In", "The", list("Juke", "Box"), "Baaaaaby")`
+    
+    From this list, extract/subset me a vector with two elements: 10 and "Juke", in that order. Print it. (0.75 pts)
+    
+    What type of vector is this? Why? (0.25 pts)
+    
+
+
+**To submit this assignment:**
+
+Ideally, knit straight to PDF by changing `html_document` to `pdf_document` in line 5 above. Otherwise:
+
+1. Knit to HTML. An HTML document should open automatically in another RStudio window.
+
+2. Click "Open in Browser" in that HTML document. It should open as a webpage in your default browser (e.g. Chrome).
+
+3. Click Ctrl+P/Command+P, but instead of printing a hard copy on your printer click "Save as PDF."
+
+4. Save and upload that document to Canvas.
+
+
+
+
+------BEGIN ANSWER BELOW--------
+
+# Rock Song Analysis
+
+### Data
+
+##### Explore Data
+
+First we need to import tidyverse and fivethirtyeight packages. Tidyverse contains the functions we need to use later and rock song data is in fivethrityeight packages. I explore the two datasets using head() and str() so I know the variables, data type, and the number of observations in each dataset.
+
+```{r}
+data("classic_rock_raw_data")
+data("classic_rock_song_list")
+head(classic_rock_raw_data)
+head(classic_rock_song_list)
+str(classic_rock_raw_data)
+str(classic_rock_song_list)
+```
+
+##### Fix Data
+
+Elton John song is listed as being released in 1071, when it was actually 1971. I fix the specific one entry by replacing 1071 with 1971.
+```{r}
+classic_rock_song_list <- classic_rock_song_list %>% 
+    mutate(release_year = replace(release_year, release_year == 1071, 1971))
+```
+
+##### Join Data
+
+Classic_rock_raw_data does not have variable "release year" but Classic_rock_song_list has. To make "release year" available in Classic_rock_raw_data, we need to join the two datasets. I also need to match on more columns to avoid extra observations created due to some songs having more than one artists. I prevent this issue by using multiple columns to identify a unique observation so new observation will not be created when two different records for each song play with different release years.
+
+```{r}
+## Select only song and release_year columns in the classic_rock_song_list datasets and join it to classic_rock_raw_data by matching on key variable "song"
+classic_rock_raw_data <- classic_rock_song_list %>% 
+  select(song:combined) %>%
+  right_join(classic_rock_raw_data, by = c("artist","song","combined"))
+classic_rock_raw_data
+
+leftry <- classic_rock_raw_data %>% 
+  left_join(select(classic_rock_song_list, song:combined), by = c("artist", "song", "combined"))
+leftry
+```
+
+
+## Data Analysis
+
+##### Geographical Distribution of Release Years of Songs
+
+Here, I visualize the distribution of release years of the song into two categories, west and east of its radio station. Radio stations with a callsign beginning with "K" are located west of the Mississippi River, and those with a calssing beginning with "W" are located to its east. 
+```{r}
+VideoSt <- classic_rock_raw_data %>% 
+    mutate(direction = case_when(substr(callsign,1,1) == "K" ~ "West",
+                               substr(callsign,1,1) == "W" ~ "East")) 
+    ## Create a new variable based on the first letter of callsign. If it is K, then the variable returns West. If it is W the variable returns East.
+    ggplot(VideoSt, mapping = aes(x = release_year, color = direction), position = "identity") + 
+    geom_freqpoly(alpha = 0.5) +
+    xlim(1950,NA)+
+    ## Create a histogram with x shows the release year and color shows whether it is from a West or East radio station.
+    labs(title = "Geographical Distribution of Release Years of Songs",
+         x = "Release Years",
+         y = "Number of Songs") +
+    # Here I set my x and y axis label and the title of my graph
+    theme(legend.position = "bottom",
+          legend.title = element_blank())
+## I move the legend to the bottom and remove legend title
+    
+```
+The graph shows that the East radio station play songs a little more than West radio station. Both radio stations play the most number of songs from 1971-1977.
+
+##### Artists
+
+I want to see different artist and print the first 10 different artists.
+
+```{r}
+Factor <- factor(classic_rock_raw_data$artist)
+levels(Factor)[1:10]
+```
+My favorite artist is "3 Doors Down" and I make it the new first level of my factor
+
+```{r}
+# Order with my favorite artist on top by specifying it
+facArt <- relevel(Factor, "3 Doors Down")
+levels(facArt)[1:10]
+```
+
+##### Extract Data
+
+First way: I extract value "Jimi Hendrix" by subsetting the artist column then return the value of the index 14430.
+
+Second way: I take it directly from the dataset by extracting the value at column number 2, row number 14430.
+
+```{r}
+Extract <- classic_rock_raw_data$artist
+Extract[14430]
+
+ExtractDir <- classic_rock_raw_data[[14430,2]]
+ExtractDir
+```
+### List
+
+Extract 10 and "Juke" from the given list in order.
+
+```{r}
+List <- list(list("I", "Love", "Rock & Roll", "Put", "Another"), 10, "In", "The", list("Juke", "Box"), "Baaaaaby")
+
+Save <- c(List[2],List[[5]][[1]])
+Save
+
+```
+Save is a Character vector because when I create a vector with multiple element types. R  always assign the whole vector the most complex data type. In the vector Save, 10 is double type and "Juke" is Character type. Character type is the most complex type so the vector is character type.

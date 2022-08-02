@@ -1,0 +1,184 @@
+---
+title: "HW2"
+author: "Eric Xue"
+date: "3/9/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup}
+pacman::p_load(knitr, tidyverse, nycflights13)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Instructions
+
+This HW is worth 10 total points.
+
+1. Make sure to load any packages you may need right at the start. Do *NOT* include the `learnr` package, ever, unless you are writing an interactive Tutorial (which you won't do in this course) - this will cause problems.
+
+2. Ensure that no chunks have the `include = FALSE` or `echo = FALSE` option, as I want to be able to see *all* your code and output.
+
+3. Brief but descriptive headings and document organization (answers under headings, text near relevant code, brief explanatory text as necessary, etc.) (1 pt)
+
+    **Look to my HW1 and RMarkdown Organization examples for how to write good headings, organize your assignment, and how much narrative text (outside of code chunks) I want. But a good rule of thumb is: explain what YOU'RE doing, NOT what YOUR CODE is doing. I do NOT need to see a repeat, line-by-line narration of what your code does - you can use code comments for that. (In complex blocks you usually want at least a comment every few lines.) I DO want to see an overall summary of what you did in your analysis.**
+
+
+4. Use the `flights` dataset from the `nycflights13` package again.
+    
+    i) Visualize the distribution of minutes flights spent in the air (`air_time`) a) overall and b) colored (or filled!) by `origin` (departing airport code - EWR for Newark, LGA for Laguardia, or JFK for John F. Kennedy) using your geom of choice (histogram, density, freqpoly, or ridgeplot/joyplot) in one or more code chunks. For the plot by airport, make sure we can see the distribution separately for each origin airport (that is, *don't* produce a stacked histogram).
+    
+        Give both plots a title, human-readable axis labels, and (if relevant) remove the legend title.
+    
+        Explain briefly what you see in narrative text. a) What is the shape of the distribution? Can you guess why it's shaped how it is (this requires some knowledge of U.S. geography, so especially if you're an international student it's OK if your guess is wrong)? b) Does the distribution of flight lengths vary any by airport? If so, what might explain that (HINT: not all airports have flights to all destinations)? (2 pts)
+    
+    ii) Visualize the number of flights per carrier and origin airport using a (stacked) bar chart. Color portions of the bar by airport.  
+    
+        Give the plot a title, human-readable axis labels, and remove the legend title. **Color (fill) the bars using a viridis scale.**
+    
+        Explain briefly what you see in narrative text **by answering the following questions**. a) Which four airlines had the most total flights, and roughly how many for each?  b) Did the majority of their flights depart from the same or different airports? Feel free to just identify the airline by their 2-letter code, but if you're curious which code corresponds to which airline you can look it up [here](https://www.iata.org/en/publications/directories/code-search/?airline.search=HA)(2 pts)
+    
+    
+5. Now use the `midwest` data frame included in the `tidyverse` package that provides some county-level demographic data for 5 Midwest states in the U.S.
+
+    i) Provide a scatter plot illustrating the relationship between `percollege` (i.e., the percent of people who went to college in a county) and `percbelowpoverty` (i.e., the percent of that county living below the poverty line) with a smoothed fit line using the default smoothing method, LOESS. 
+    
+        Summarize what you see in 1-2 sentences of narrative text. (1.5 pts)
+    
+    
+    ii) Let's make this plot much prettier and more informative. 
+            
+        a) Color the dots by `inmetro` (i.e., whether the county is in an urban metropolitan area (1) or a rural area (0)). Note you should use `color = as.factor(inmetro)` to make R treat `inmetro` as categorical rather than continuous.
+            
+        b) Facet the plot by state. Produce graphs with both fixed and free scales; decide which one you like best, and include that one in your report.
+            
+        c) Remove the smoothing lines to reduce clutter.
+            
+        d) Add an informative title, move the legend to the bottom, remove the legend title, and make the axis titles and legend labels informative and human-readable. Choose some non-default colors for the dots - use either the viridis colors or a palette appropriate for unordered categorical data from `RColorBrewer`. In short, pretty up the graph a bit.
+            
+        Summarize what you see in 3-4 sentences of narrative text **by answering the following questions**. a) Do urban or rural counties tend to have more or fewer people who went to college, and more or less poverty? b) Does the relationship between college and poverty differ in urban vs. rural counties (that is, does one rise or fall with the other in both types of counties)? c) Are these relationships consistent across states or not?  d) Do you notice any interesting outlier counties? Pick at least one, go into the data, and name the county and state. Ideally from here you would do a little research to figure out *why* that county might be an outlier, but you'll still get full credit if you don't. (3.5 total pts)
+        
+Note: if you've done this properly, you should have *5* plots in the full report.
+
+
+**To submit this assignment:**
+
+Ideally, knit straight to PDF by changing `html_document` to `pdf_document` in line 5 above. Otherwise:
+
+1. Knit to HTML. An HTML document should open automatically in another RStudio window.
+
+2. Click "Open in Browser" in that HTML document. It should open as a webpage in your default browser (e.g. Chrome).
+
+3. Click Ctrl+P/Command+P, but instead of printing a hard copy on your printer click "Save as PDF."
+
+4. Save and upload that document to Canvas.
+
+
+
+
+------BEGIN ANSWER BELOW--------
+
+# NY Flights in 2013
+
+First we need to load the flights data, which comes as part of the nycflights13 package. 
+
+```{r}
+data(flights)
+```
+
+## The distribution of minutes flights spent in the air
+
+We visualize the distribution of minutes of flights spent in the air by creating a histogram.
+
+```{r}
+ggplot(data = flights) +
+    geom_histogram(mapping = aes(x = air_time)) +
+    labs(title = "Minutes flights spent in the air",
+         x = "Minutes in the air",
+         y = "number of flights")
+
+ggplot(data = flights) +
+    geom_histogram(mapping = aes(x = air_time, fill = origin),
+    # What I'm doing here is creating a histogram with x --> the minutes in the air and y--> the number of flights. Different color segments represent flights taking off from different airport.
+                   position = "identity",
+                   alpha = 0.5) +
+    # I use position and alpha to adjust column transparency so they are not packed together. 
+    labs(title = "Minuts flights spent in the air",
+         x = "Minutes in the air",
+         y = "number of flights") +
+    # Here I set my x and y axis lable and the title of my graph
+    theme(legend.position = "bottom",
+          legend.title = element_blank())
+    # I move the legend to the bottom and removed the legend title
+```
+
+Overall speaking, the graph has three peaks, which show that there are many airplanes that spend about 75, 125, and 330 minutes in the air. Specific to each airport, JFK and EWR are similar in shape and they both have flights that spend about 600 minutes in the air. Flights taken off from LGA don't tend to spend super long in the air but many flights that spend less than 230 minutes in air are taken off from LGA. At about 125 minutes in the air, number of flights taken off from LGA forms a peak in the graph. 
+
+I guess the overall shape is due to U.S. territory is a rectangle shape and NY is at the upper right corner. The two peaks below 200 minutes are probably the result of people traveling down to the Southern states from NY. The peak at about 330 minutes is probably the result of people traveling to the western major cities such as LA and Seattle.
+
+The distribution of flight lengths vary by airport. This is probably due to international flights only take off at EWR and JFK, which is why there are planes taken off from these two airport spend 600 minutes in the air. LGA is more responsible for domestic flight, which is why we observe big number of flight that spend below 200 minutes taken off from LGA. 
+
+## Flights per carrier and origin airport
+
+Now we visualize the amount of flights per carreir and origin airport by creating a bar graph
+
+```{r}
+ggplot(data = flights) +
+    geom_bar(mapping = aes(x = carrier, fill = origin))+
+    scale_fill_viridis_d(option = "viridis") +
+    # Creating a bar graph with carriers on x-axis. Y axis shows the number of flights by different carriers. I color the bar based on which airport these flights depart from
+    labs(title = "Flights per carrier and origin",
+         x = "Carrier",
+         y = "Number of Flights")+
+    theme(legend.position = "bottom",
+          legend.title = element_blank())
+    # Creating x and y axis labels. Move the legend to bottom and remove the legend title
+```
+
+B6, DL, EV, and UA had the most total flights. They roughly have about 50000 flights. UA has about 60000 flights. The majority of flight from EV and UA are from EWR. The majority of flights from B6 are from JFK. DL also has many flights from JFK but also an almost equal number of flights from LGA. 
+
+# County-level demographic data for 5 Midwest states in the U.S.
+
+First, we load midwest data, which is from tidyverse package
+
+```{r}
+data("midwest")
+```
+
+## Relationship between rate of college education and percentage below the poverty line
+
+Then we create a scatter plot to observe this relationship
+
+```{r}
+ggplot(data = midwest, mapping = aes(x = percbelowpoverty, y = percollege)) +
+    geom_point() + 
+    # Creating a scatter plot
+    geom_smooth()
+    # Adding a smoothed fit line with default smoothing method. 
+```
+
+As percent of people live below poverty line increase, the percentage of people who go to college decreases. At the county where higher percentage of people live below the poverty line, less percentage of people go to college. 
+
+## College education rate, poverty rate, and urban or rural + decoration
+
+Then we add in information of inmetro. Finally we pretty up the graph by faceting by states and color the dots based on if its rural or urban.
+
+```{r}
+ggplot(data = midwest, mapping = aes(x = percollege, y = percbelowpoverty, color = as.factor(inmetro))) +
+    geom_point() + 
+    # same scatter plot. I color the dots based on if it is urban area (1) or rural area (0)
+    facet_wrap(~ state) +
+    # Facet the plot by state. So now, instead having one messy graph, I have five relative clean graph
+    labs(title = "Relationship between percentage of poverty and receiving college education",
+         x = "The percent of people who went to college in a county",
+         y = "The percent of people in that county living below the poverty line") +
+    theme(legend.position = "bottom",
+          legend.title = element_blank()) +
+    # Add graph title and change the x,y axix label to human-readable labels. Then move the legend to the bottom and remove legend title.
+    scale_color_viridis_d(option = "viridis")
+    # Ask R to use viridis colors to color the dots
+```
+
+Urban counties tend to have more people go to college and urban area tend to have less poverty. The relationship between college and poverty differ in urban vs. rural counties or at least this relationship is not very obvious in rural area. In urban area, with less poverty, we observe an obvious increase of the percent of people go to college. In the rural area, the percent of people go to college is relative the same regardless of the poverty. These relationships are fairly consistent across states due to the shape of the scatter plots are relatively same. One of the outlier counties is Athens. It has almost 30 percent people live below poverty, which is the highest among all county in OH, and 30 percent people go to college, which is one of the highest among all county. I guess this is because people in this county really value education so as long as they have any money, they will use it on education.
